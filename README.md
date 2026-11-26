@@ -296,3 +296,5 @@ npm test
 
 ## 📄 License
 MIT © 2026 Operations Systems Engineering.
+#   S m a r t - R o s t e r - M a n a g e m e n t - S y s t e m  
+ 
