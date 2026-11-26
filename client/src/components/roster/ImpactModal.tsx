@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Employee, BackupSuggestion, LeaveImpactResult } from '../../types/index.js';
 import { apiRequest } from '../../api/client.js';
-import { X, Sparkles, Check, AlertTriangle, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { X, Sparkles, Check, AlertTriangle, ArrowRight, ShieldCheck, Zap, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface ImpactModalProps {
   isOpen: boolean;
@@ -29,6 +29,7 @@ export const ImpactModal: React.FC<ImpactModalProps> = ({
   const [leaveType, setLeaveType] = useState<'planned' | 'comp_off' | 'sick'>('planned');
 
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [impactData, setImpactData] = useState<{
     impact: LeaveImpactResult;
     suggestionsByGap: Record<string, BackupSuggestion[]>;
@@ -39,6 +40,7 @@ export const ImpactModal: React.FC<ImpactModalProps> = ({
 
   const runAnalysis = async () => {
     setIsLoading(true);
+    setErrorMessage(null);
     setAppliedSuccess(null);
     try {
       const result = await apiRequest(`/rosters/${rosterId}/impact`, {
@@ -54,7 +56,7 @@ export const ImpactModal: React.FC<ImpactModalProps> = ({
       });
       setImpactData(result);
     } catch (err: any) {
-      alert(`Impact analysis failed: ${err.message}`);
+      setErrorMessage(`Impact analysis failed: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -62,19 +64,20 @@ export const ImpactModal: React.FC<ImpactModalProps> = ({
 
   const applySuggestion = async (suggestion: BackupSuggestion) => {
     setIsApplying(true);
+    setErrorMessage(null);
     try {
       await apiRequest(`/rosters/${rosterId}/apply-suggestion`, {
         method: 'POST',
         body: JSON.stringify({ suggestion }),
       });
       setAppliedSuccess(
-        `Applied! ${suggestion.tradeOffSummary} Roster re-validated with zero deficits.`
+        `Applied: ${suggestion.tradeOffSummary} Roster re-validated with zero deficits.`
       );
       onSuggestionApplied();
       // Re-run analysis to show resolved state
       await runAnalysis();
     } catch (err: any) {
-      alert(`Failed to apply backup fix: ${err.message}`);
+      setErrorMessage(`Failed to apply backup fix: ${err.message}`);
     } finally {
       setIsApplying(false);
     }
@@ -108,6 +111,13 @@ export const ImpactModal: React.FC<ImpactModalProps> = ({
 
         {/* Form Body */}
         <div className="p-6 space-y-6 overflow-y-auto flex-1">
+          {errorMessage && (
+            <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2.5 text-xs font-semibold text-rose-800">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {/* Leave parameters selector */}
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
             <div className="flex items-center justify-between">
@@ -178,8 +188,8 @@ export const ImpactModal: React.FC<ImpactModalProps> = ({
           </div>
 
           {appliedSuccess && (
-            <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center gap-2 text-xs font-semibold text-emerald-900 animate-fadeIn">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center gap-2.5 text-xs font-semibold text-emerald-900 animate-fadeIn">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{appliedSuccess}</span>
             </div>
           )}
@@ -217,8 +227,9 @@ export const ImpactModal: React.FC<ImpactModalProps> = ({
                 </h4>
 
                 {impactData.impact.coverageGaps.length === 0 ? (
-                  <div className="p-6 text-center text-slate-500 text-xs bg-slate-50 rounded-xl border border-slate-200">
-                    ✓ No coverage deficits detected for this absence. Process minimums are safely met by remaining staff.
+                  <div className="p-6 text-center text-slate-600 text-xs bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>No coverage deficits detected for this absence. Process minimums are safely met by remaining staff.</span>
                   </div>
                 ) : (
                   impactData.impact.coverageGaps.map(gap => {
@@ -234,16 +245,16 @@ export const ImpactModal: React.FC<ImpactModalProps> = ({
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-slate-900 text-sm">
-                                {gap.brandName} — {gap.processName}
+                                {gap.brandName} - {gap.processName}
                               </span>
                               {gap.isSoleResource && (
                                 <span className="text-[10px] font-extrabold uppercase bg-red-100 text-red-800 border border-red-200 px-2 py-0.5 rounded">
-                                  Sole Resource Absence!
+                                  Sole Resource Absence
                                 </span>
                               )}
                             </div>
                             <p className="text-xs text-slate-500 mt-0.5">
-                              Date: <span className="font-mono font-medium text-slate-800">{gap.date}</span> · Deficit:{' '}
+                              Date: <span className="font-mono font-medium text-slate-800">{gap.date}</span> | Deficit:{' '}
                               <strong className="text-red-700">{gap.deficit} staff</strong> ({gap.currentWorkingStaff} of {gap.requiredStaff} required)
                             </p>
                           </div>

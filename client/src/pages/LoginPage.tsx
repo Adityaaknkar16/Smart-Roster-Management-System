@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
-import { Shield, Sparkles, User, Lock, ArrowRight } from 'lucide-react';
+import { Shield, Sparkles, User, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -91,8 +91,9 @@ export const LoginPage: React.FC = () => {
         <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 bg-red-900/30 border border-red-700/50 rounded-xl text-xs text-red-300">
-                {error}
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 flex items-center gap-2 font-medium">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 

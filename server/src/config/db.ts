@@ -9,7 +9,8 @@ export async function connectDB(): Promise<string> {
 
   if (uri && uri.startsWith('mongodb')) {
     try {
-      console.log(`[DB] Attempting connection to MongoDB URI: ${uri}`);
+      const sanitizedUri = uri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@');
+      console.log(`[DB] Attempting connection to MongoDB (${sanitizedUri})...`);
       await mongoose.connect(uri, {
         serverSelectionTimeoutMS: 3000,
       });

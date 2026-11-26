@@ -35,6 +35,8 @@ import {
   Sliders,
   User,
   LayoutGrid,
+  AlertCircle,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 
@@ -63,6 +65,10 @@ export const RosterPage: React.FC = () => {
   // Filters
   const [podFilter, setPodFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [pageAlert, setPageAlert] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   // Fetch all rosters
   const { data: rosters = [], isLoading: isRostersLoading } = useQuery<Roster[]>({
@@ -131,8 +137,18 @@ export const RosterPage: React.FC = () => {
         }),
       }),
     onSuccess: () => {
+      setPageAlert({
+        type: 'success',
+        message: `Roster for ${selectedMonth}/${selectedYear} generated successfully.`,
+      });
       queryClient.invalidateQueries({ queryKey: ['rosters'] });
       queryClient.invalidateQueries({ queryKey: ['roster'] });
+    },
+    onError: (err: any) => {
+      setPageAlert({
+        type: 'error',
+        message: err.message || 'Failed to generate roster.',
+      });
     },
   });
 
@@ -171,12 +187,23 @@ export const RosterPage: React.FC = () => {
   // Publish Mutation
   const handlePublish = async (overrideReason?: string) => {
     if (!activeRosterId) return;
-    await apiRequest(`/rosters/${activeRosterId}/publish`, {
-      method: 'POST',
-      body: JSON.stringify({ overrideReason }),
-    });
-    queryClient.invalidateQueries({ queryKey: ['rosters'] });
-    queryClient.invalidateQueries({ queryKey: ['roster'] });
+    try {
+      await apiRequest(`/rosters/${activeRosterId}/publish`, {
+        method: 'POST',
+        body: JSON.stringify({ overrideReason }),
+      });
+      setPageAlert({
+        type: 'success',
+        message: 'Roster published successfully. Version updated.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['rosters'] });
+      queryClient.invalidateQueries({ queryKey: ['roster'] });
+    } catch (err: any) {
+      setPageAlert({
+        type: 'error',
+        message: err.message || 'Failed to publish roster.',
+      });
+    }
   };
 
   // Export CSV
@@ -201,6 +228,32 @@ export const RosterPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Page Alert */}
+      {pageAlert && (
+        <div
+          className={`p-4 rounded-xl border flex items-center justify-between text-xs font-medium animate-fadeIn ${
+            pageAlert.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-rose-50 border-rose-200 text-rose-800'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            {pageAlert.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span>{pageAlert.message}</span>
+          </div>
+          <button
+            onClick={() => setPageAlert(null)}
+            className="p-1 hover:bg-black/5 rounded-md transition text-slate-500 hover:text-slate-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Top Controls Bar */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">

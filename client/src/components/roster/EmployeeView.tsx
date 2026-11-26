@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Employee, RosterEntry, Assignment, Process, Brand, ValidationIssue } from '../../types/index.js';
 import { getStatusColor } from './CompanyView.js';
-import { Calendar, User, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Calendar, User, CheckCircle2, AlertTriangle, AlertCircle, Lock } from 'lucide-react';
 
 interface EmployeeViewProps {
   dates: string[];
@@ -103,8 +103,8 @@ export const EmployeeView: React.FC<EmployeeViewProps> = ({
               </select>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Role: <span className="font-semibold text-slate-700 uppercase">{selectedEmp?.role?.replace('_', ' ')}</span> ·{' '}
-              Max Consecutive Days: <span className="font-semibold text-slate-700">{selectedEmp?.maxConsecutiveWorkDays || 6}</span> ·{' '}
+              Role: <span className="font-semibold text-slate-700 uppercase">{selectedEmp?.role?.replace('_', ' ')}</span> |{' '}
+              Max Consecutive Days: <span className="font-semibold text-slate-700">{selectedEmp?.maxConsecutiveWorkDays || 6}</span> |{' '}
               Weekly Offs Target: <span className="font-semibold text-slate-700">{selectedEmp?.weeklyOffsPerWeek || 1}/week</span>
             </p>
           </div>
@@ -142,10 +142,11 @@ export const EmployeeView: React.FC<EmployeeViewProps> = ({
             <AlertTriangle className="w-4 h-4 text-rose-600" />
             <span>Active Validation Alerts for {selectedEmp?.name}</span>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {empIssues.map(issue => (
-              <div key={issue.id} className="text-xs text-rose-800 bg-white p-2 rounded border border-rose-100">
-                • {issue.message}
+              <div key={issue.id} className="text-xs text-rose-800 bg-white p-2.5 rounded-lg border border-rose-100 flex items-start gap-2">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
+                <span>{issue.message}</span>
               </div>
             ))}
           </div>
@@ -206,8 +207,17 @@ export const EmployeeView: React.FC<EmployeeViewProps> = ({
                   <div className="text-[10px] font-normal opacity-90">{status.replace('_', ' ')}</div>
                 </div>
 
-                <div className="text-[9px] text-slate-400 truncate">
-                  {entry?.locked ? '🔒 Locked' : entry?.source === 'manual' ? 'Manual' : 'Auto'}
+                <div className="text-[9px] text-slate-400 truncate flex items-center gap-1">
+                  {entry?.locked ? (
+                    <>
+                      <Lock className="w-2.5 h-2.5 text-slate-400" />
+                      <span>Locked</span>
+                    </>
+                  ) : entry?.source === 'manual' ? (
+                    'Manual'
+                  ) : (
+                    'Auto'
+                  )}
                 </div>
               </div>
             );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Employee, RosterEntry, EntryStatus } from '../../types/index.js';
-import { X, Check, Lock, AlertCircle } from 'lucide-react';
+import { X, Check, Lock, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 interface CellEditModalProps {
   isOpen: boolean;
@@ -26,6 +26,7 @@ export const CellEditModal: React.FC<CellEditModalProps> = ({
   );
   const [isLocked, setIsLocked] = useState<boolean>(currentEntry?.locked ?? true);
   const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [deltaResult, setDeltaResult] = useState<{
     newIssues: any[];
     resolvedIssues: any[];
@@ -41,6 +42,7 @@ export const CellEditModal: React.FC<CellEditModalProps> = ({
 
   const handleSave = async () => {
     setIsSaving(true);
+    setErrorMessage(null);
     try {
       const res = await onSave(selectedStatus, isLocked);
       if (res?.delta) {
@@ -48,6 +50,8 @@ export const CellEditModal: React.FC<CellEditModalProps> = ({
       } else {
         onClose();
       }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to update entry');
     } finally {
       setIsSaving(false);
     }
@@ -60,7 +64,7 @@ export const CellEditModal: React.FC<CellEditModalProps> = ({
           <div>
             <h3 className="font-bold text-slate-900 text-sm">Edit Shift Entry</h3>
             <p className="text-xs text-slate-500">
-              {employee.name} · <span className="font-mono font-medium">{date}</span>
+              {employee.name} | <span className="font-mono font-medium">{date}</span>
             </p>
           </div>
           <button
@@ -72,6 +76,13 @@ export const CellEditModal: React.FC<CellEditModalProps> = ({
         </div>
 
         <div className="p-5 space-y-4">
+          {errorMessage && (
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-xs text-rose-800">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider">
               Select Shift Status
@@ -123,15 +134,17 @@ export const CellEditModal: React.FC<CellEditModalProps> = ({
 
           {/* Validation Delta feedback if available */}
           {deltaResult && (
-            <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-1 text-xs">
+            <div className="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-xl space-y-2 text-xs">
               <span className="font-bold text-indigo-900 block">Validation Impact Delta:</span>
-              <p className="text-emerald-700">
-                ✓ {deltaResult.resolvedIssues.length} conflict(s) resolved.
-              </p>
+              <div className="flex items-center gap-1.5 text-emerald-800 font-medium">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{deltaResult.resolvedIssues.length} conflict(s) resolved</span>
+              </div>
               {deltaResult.newIssues.length > 0 && (
-                <p className="text-rose-700 font-semibold">
-                  ⚠ {deltaResult.newIssues.length} new conflict(s) introduced!
-                </p>
+                <div className="flex items-center gap-1.5 text-rose-800 font-semibold">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                  <span>{deltaResult.newIssues.length} new conflict(s) introduced</span>
+                </div>
               )}
             </div>
           )}

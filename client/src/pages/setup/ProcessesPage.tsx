@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../../api/client.js';
 import { Process, Brand, CalendarMode, ProcessType } from '../../types/index.js';
-import { Sliders, Plus, Edit2, Trash2, Check, Calendar, AlertCircle } from 'lucide-react';
+import { Sliders, Plus, Edit2, Trash2, Check, Calendar, AlertCircle, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -351,9 +351,10 @@ export const ProcessesPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => removeDateOverride(ov.date)}
-                          className="text-red-500 hover:text-red-700 font-bold"
+                          className="text-rose-500 hover:text-rose-700 p-0.5 rounded hover:bg-rose-50 transition"
+                          title="Remove override"
                         >
-                          ✕
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -468,8 +469,9 @@ export const ProcessesPage: React.FC = () => {
               </div>
 
               {proc.dateOverrides && proc.dateOverrides.length > 0 && (
-                <div className="text-[11px] bg-slate-50 text-slate-600 px-2.5 py-1 rounded border border-slate-200">
-                  ⚡ {proc.dateOverrides.length} date override(s) active
+                <div className="text-[11px] bg-indigo-50/70 text-indigo-700 px-2.5 py-1 rounded border border-indigo-100 flex items-center gap-1.5 font-medium">
+                  <Calendar className="w-3 h-3 text-indigo-500 shrink-0" />
+                  <span>{proc.dateOverrides.length} date override(s) active</span>
                 </div>
               )}
             </div>

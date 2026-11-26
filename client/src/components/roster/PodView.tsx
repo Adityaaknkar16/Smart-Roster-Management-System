@@ -51,7 +51,7 @@ export const PodView: React.FC<PodViewProps> = ({
                 <div>
                   <h3 className="font-bold text-slate-900 text-sm">{pod.name}</h3>
                   <p className="text-xs text-slate-500">
-                    Lead: <span className="font-medium text-slate-700">{podLead?.name || 'Unassigned'}</span> ·{' '}
+                    Lead: <span className="font-medium text-slate-700">{podLead?.name || 'Unassigned'}</span> |{' '}
                     <span>{podEmployees.length} members</span>
                   </p>
                 </div>

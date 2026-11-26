@@ -52,9 +52,6 @@ async function startServer() {
   }
 }
 
-// Start server if executed directly
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}`) {
-  startServer();
-}
+startServer();
 
 export default app;

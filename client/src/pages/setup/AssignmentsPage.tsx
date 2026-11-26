@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../../api/client.js';
 import { Assignment, Employee, Process, Brand } from '../../types/index.js';
-import { Network, Plus, Trash2, Check, LayoutGrid, List } from 'lucide-react';
+import { Network, Plus, Trash2, Check, LayoutGrid, List, Info } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 
 export const AssignmentsPage: React.FC = () => {
@@ -91,7 +91,7 @@ export const AssignmentsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-800">Resource Assignments (Employee ↔ Process)</h2>
+          <h2 className="text-xl font-bold text-slate-800">Resource Assignments (Employee &harr; Process)</h2>
           <p className="text-sm text-slate-500">
             Many-to-many allocation matrix: agents can cover multiple processes or brands, and processes can have multiple agents.
           </p>
@@ -162,7 +162,7 @@ export const AssignmentsPage: React.FC = () => {
                       : brands.find(brand => brand._id === p.brandId);
                   return (
                     <option key={p._id} value={p._id}>
-                      {b?.name} — {p.name}
+                      {b?.name} - {p.name}
                     </option>
                   );
                 })}
@@ -214,9 +214,12 @@ export const AssignmentsPage: React.FC = () => {
       {viewMode === 'matrix' ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
           <div className="p-3 bg-slate-50 border-b border-slate-200 text-xs text-slate-500 flex items-center justify-between">
-            <span>💡 Click any cell to toggle assignment. Numbers represent allocation percent.</span>
+            <div className="flex items-center gap-1.5">
+              <Info className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+              <span>Click any cell to toggle assignment. Numbers represent allocation percent.</span>
+            </div>
             <span className="font-semibold text-slate-700">
-              {employees.length} Employees × {processes.length} Processes
+              {employees.length} Employees &times; {processes.length} Processes
             </span>
           </div>
           <div className="overflow-x-auto roster-scrollbar max-h-[600px]">
@@ -251,7 +254,7 @@ export const AssignmentsPage: React.FC = () => {
               <tbody className="divide-y divide-slate-100">
                 {employees.map(emp => (
                   <tr key={emp._id} className="hover:bg-slate-50/70">
-                    <td className="px-3 py-2 sticky left-0 bg-white font-medium text-slate-900 z-10 border-r border-slate-200 truncate">
+                    <td className="px-3 py-2 sticky left-0 bg-white font-medium text-slate-900 z-10 border-r border-slate-200 shadow-xs truncate">
                       {emp.name}
                     </td>
                     {processes.map(proc => {
@@ -273,7 +276,7 @@ export const AssignmentsPage: React.FC = () => {
                               {asgn?.allocationPercent || 100}%
                             </span>
                           ) : (
-                            <span className="text-slate-300 text-xs">·</span>
+                            <span className="text-slate-300 text-xs font-mono">-</span>
                           )}
                         </td>
                       );
